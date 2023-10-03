@@ -6,5 +6,6 @@ data class User (
     var Material:String? = null,
     var foodPic:String? = null,
     var steps:String?=null,
-    var savedTo:String? = null
+    var savedTo:String? = null,
+    var foodType:String? =null
 )

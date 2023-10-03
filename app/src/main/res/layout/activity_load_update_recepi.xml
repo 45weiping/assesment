@@ -1,12 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/backgroundGrey"
-    tools:context=".MainActivity">
+    tools:context=".LoadUpdateRecepi">
 
     <androidx.appcompat.widget.LinearLayoutCompat
         android:layout_width="match_parent"
@@ -32,7 +31,6 @@
             android:id="@+id/edMaterial">
 
         </EditText>
-
         <androidx.appcompat.widget.LinearLayoutCompat
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -41,13 +39,13 @@
             tools:ignore="MissingConstraints">
 
             <Button
-                android:id="@+id/btn_save"
+                android:id="@+id/btn_update"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Save">
+                android:layout_marginStart="8dp"
+                android:text="Update">
 
             </Button>
-
             <Button
                 android:id="@+id/btn_back"
                 android:layout_width="wrap_content"
@@ -61,17 +59,18 @@
         </androidx.appcompat.widget.LinearLayoutCompat>
         <RelativeLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
+            android:layout_height="wrap_content"
             android:padding="16dp"
             tools:context=".MainActivity">
 
+
             <ImageView
                 android:id="@+id/imageView"
-                android:layout_width="180dp"
-                android:layout_height="180dp"
-                android:layout_alignParentStart="true"
+                android:layout_width="156dp"
+                android:layout_height="150dp"
                 android:layout_alignParentEnd="true"
-                android:layout_marginEnd="150dp"
+                android:layout_marginStart="10dp"
+                android:layout_marginEnd="206dp"
                 android:scaleType="centerCrop"
                 android:src="@drawable/ic_launcher_foreground" />
 
@@ -83,8 +82,8 @@
                 android:layout_alignParentEnd="true"
                 android:layout_marginStart="15dp"
                 android:layout_marginTop="-124dp"
-                android:layout_marginEnd="5dp"
-                android:text="Select Image" />
+                android:layout_marginEnd="35dp"
+                android:text="SelectImage" />
 
             <Button
                 android:id="@+id/uploadButton"
@@ -93,7 +92,8 @@
                 android:layout_below="@+id/imageView"
                 android:layout_alignParentEnd="true"
                 android:layout_marginStart="15dp"
-                android:layout_marginTop="-72dp"
+                android:layout_marginTop="-75dp"
+                android:layout_marginEnd="31dp"
 
                 android:text="Upload Image" />
         </RelativeLayout>
@@ -111,9 +111,6 @@
 
 
 
-
-
     </androidx.appcompat.widget.LinearLayoutCompat>
-
 
 </androidx.constraintlayout.widget.ConstraintLayout>

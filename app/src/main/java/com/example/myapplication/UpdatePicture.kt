@@ -1,21 +1,19 @@
+package com.example.myapplication
 
 import android.app.ProgressDialog
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.util.Log
-import com.example.myapplication.MainActivity
 import com.google.firebase.storage.FirebaseStorage
 
-
-class FirebaseStorageManager (){
-
+class UpdatePicture {
     private val TAG = "FirebaseStorageManager"
     private val mStorageRef = FirebaseStorage.getInstance().reference
     private lateinit var mProgressDialog: ProgressDialog
 
 
-   fun uploadImage(context: Context, imageFileUri: Uri,food: String,material: String, steps: String, id:String, foodType:String) {
+    fun uploadImage(context: Context, imageFileUri: Uri, food: String, material: String, steps: String, id:String,foodType:String) {
 
         mProgressDialog = ProgressDialog(context)
         mProgressDialog.setMessage("Please wait, image being upload")
@@ -26,7 +24,11 @@ class FirebaseStorageManager (){
 
         val uploadTask = fileRef.putFile(imageFileUri)
 
-       uploadTask.addOnSuccessListener {
+
+
+
+
+        uploadTask.addOnSuccessListener {
             Log.e(TAG, "Image Upload success")
             mProgressDialog.dismiss()
 
@@ -37,7 +39,7 @@ class FirebaseStorageManager (){
                 val downloadURL:String? = uri.toString()
                 Log.e(TAG, "url: ${downloadURL.toString()}", )
 
-                val intent = Intent(context, MainActivity::class.java)
+                val intent = Intent(context, LoadUpdateRecepi::class.java)
                 intent.putExtra("downloadUrl", downloadURL)
                 intent.putExtra("foodName", food)
                 intent.putExtra("material",material)
@@ -49,7 +51,6 @@ class FirebaseStorageManager (){
                 Log.e(TAG, "firebase ${downloadURL.toString()}", )
                 Log.e(TAG, "food ${food.toString()}", )
                 Log.e(TAG, "material ${material.toString()}", )
-                Log.e(TAG, "foodType ${foodType.toString()}", )
 
 
             }

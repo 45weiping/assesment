@@ -15,9 +15,9 @@ class SplashScreen : AppCompatActivity() {
         val sideAnimation = AnimationUtils.loadAnimation(this,R.anim.slide)
         backgroundImg.startAnimation(sideAnimation)
         Handler().postDelayed({
-            startActivity(Intent(this,MainActivity::class.java))
+            startActivity(Intent(this,RecipeList::class.java))
             finish()
-        },1500)
+        },2000)
 
     }
 }

@@ -71,8 +71,6 @@ class UserAdapter : RecyclerView.Adapter<UserAdapter.UserViewHolder>() {
             if (data.foodPic=="null"){
                 data.foodPic="https://firebasestorage.googleapis.com/v0/b/food-recipe-3ab30.appspot.com/o/Artboard%20%E2%80%93%201.jpg?alt=media&token=8c50d86f-8260-43e2-814b-7143f02e62d9&_gl=1*1weh6y9*_ga*MzI4Mjc3OTAwLjE2OTU2MzI1MzQ.*_ga_CW55HF8NVT*MTY5NjA4NTc5Ny4yMi4xLjE2OTYwODU4MTYuNDEuMC4w"
             }
-
-
             tvFoodName?.text = data.FoodName
             tvMaterial?.text = data.Material
             val imageUri: Uri = Uri.parse(data.foodPic)

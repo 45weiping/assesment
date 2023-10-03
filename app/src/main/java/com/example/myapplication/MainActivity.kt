@@ -6,22 +6,22 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import android.util.Log
+import android.view.View
+import android.widget.AdapterView
+import android.widget.ArrayAdapter
 import android.widget.Button
 import android.widget.ImageView
+import android.widget.Spinner
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.AppCompatButton
 import androidx.appcompat.widget.AppCompatImageView
-import androidx.recyclerview.widget.LinearLayoutManager
 import com.bumptech.glide.Glide
 import com.example.myapplication.databinding.ActivityMainBinding
 import com.github.dhaval2404.imagepicker.ImagePicker
-import com.google.firebase.database.DataSnapshot
-import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
-import com.google.firebase.database.ValueEventListener
 import com.google.firebase.storage.FirebaseStorage
 
 class MainActivity : AppCompatActivity() {
@@ -51,7 +51,13 @@ class MainActivity : AppCompatActivity() {
     private val btnUpload: AppCompatButton by lazy {
         findViewById(R.id.uploadButton)
     }
-
+    private val btnBack: AppCompatButton by lazy {
+        findViewById(R.id.btn_back)
+    }
+    private val spinnerFoodType: Spinner by lazy {
+        findViewById(R.id.foodType)
+    }
+    private var foodtype:String?= null
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -59,16 +65,14 @@ class MainActivity : AppCompatActivity() {
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        initRecyclerView()
-
+        SpinnerLoad()
         firebaseDatabase = FirebaseDatabase.getInstance()
         databaseReference = firebaseDatabase?.getReference("data")
 
 
-        getData()
 
         binding.btnSave.setOnClickListener{saveData()}
-        binding.btnUpdate.setOnClickListener{updateData()}
+        binding.btnBack.setOnClickListener{navigateBack()}
         initUI()
 
         val foodPic = intent.getStringExtra("downloadUrl").toString()
@@ -76,6 +80,7 @@ class MainActivity : AppCompatActivity() {
         val food = intent.getStringExtra("foodName").toString()
         val steps = intent.getStringExtra("steps").toString()
         val material = intent.getStringExtra("material").toString()
+        val firebaseFoodType = intent.getStringExtra("foodType").toString()
         var tvFoodName:TextView = findViewById(R.id.edFoodName)
         var tvMaterial:TextView = findViewById(R.id.edMaterial)
         var tvSteps:TextView = findViewById(R.id.edMultiSteps)
@@ -93,7 +98,22 @@ class MainActivity : AppCompatActivity() {
         if(steps=="null"){
             tvSteps?.text = ""
         }else{
-            tvSteps?.text = material
+            tvSteps?.text = steps
+        }
+        if(firebaseFoodType=="null"){
+            Log.e("000", "onItemSelected: ${foodtype}", )
+            spinnerFoodType.setSelection(0)
+        }else{
+            //"Asian", "Western", "Korean", "Japanese"
+            Log.e("000", "onItemSelected: ${intent.getStringExtra("foodType")}", )
+            when (firebaseFoodType) {
+                "Asian" -> spinnerFoodType.setSelection(1)
+                "Western" -> spinnerFoodType.setSelection(2)
+                "Korean" -> spinnerFoodType.setSelection(3)
+                "Japanese" -> spinnerFoodType.setSelection(4)
+                else -> println("Value is something else")
+            }
+
         }
 
 
@@ -101,68 +121,21 @@ class MainActivity : AppCompatActivity() {
             .load(imageUri)
             .into(imgPost)
 
-    }
-
-
-
-    private fun updateData(){
-
-
-        val foodName = binding.edFoodName.text.toString()
-        val material = binding.edMaterial.text.toString()
-        val foodPic = intent.getStringExtra("downloadUrl").toString()
-        val steps = binding.edMultiSteps.text.toString()
-        if (foodName.isNotEmpty() && material.isNotEmpty()) {
-            val user = User(FoodName = foodName, Material = material, foodPic = foodPic, steps = steps)
-            selectedID=intent.getStringExtra("id").toString()
-            databaseReference?.child(selectedID.toString())?.setValue(user)
-
-            Toast.makeText(this, "The Food Recipe has been update", Toast.LENGTH_SHORT).show()
-
-        }else{
-
-            Toast.makeText(this, "Please select the recipe before update", Toast.LENGTH_SHORT).show()
-        }
-
-
 
     }
 
-    private fun initRecyclerView(){
-        adapter=UserAdapter()
-        binding.apply {
-            recyclerView.layoutManager = LinearLayoutManager(this@MainActivity)
-            recyclerView.adapter = adapter
-        }
-        adapter?.setOnClickView {
-            binding.edFoodName.setText(it.FoodName.toString())
-            binding.edMaterial.setText(it.Material.toString())
-            binding.edMultiSteps.setText(it.steps.toString())
-            val imageUri: Uri = Uri.parse(it.foodPic.toString())
-            Glide.with(this)
-                .load(imageUri)
-                .into(imgPost)
-
-
-            selectedID=it.id
-          //  Toast.makeText(this,"Click Action View ${it.id}", Toast.LENGTH_SHORT).show()
-        }
-
-        adapter?.setOnClickDelete {
-            selectedID=it.id
-            databaseReference?.child(selectedID.orEmpty())?.removeValue()
-        }
-
+    private fun navigateBack(){
+        val intent = Intent(this, RecipeList::class.java)
+        startActivity(intent)
     }
 
     private fun saveData() {
         val foodName = binding.edFoodName.text.toString()
         val material = binding.edMaterial.text.toString()
         val steps = binding.edMultiSteps.text.toString()
-
+        val firebaseFoodType = intent.getStringExtra("foodType").toString()
 
         val foodPic = intent.getStringExtra("downloadUrl").toString()
-
 
 
         if (foodName.isNotEmpty() && material.isNotEmpty()) {
@@ -170,24 +143,36 @@ class MainActivity : AppCompatActivity() {
             if(steps.isEmpty()){
                 Toast.makeText(this, "Please tell us the steps first", Toast.LENGTH_SHORT).show()
             }else{
-                if (intent != null){
-                    Log.e("saving", "saveData: ${foodPic.toString()}",)
-                    val user = User(FoodName = foodName, Material = material, foodPic = foodPic, steps = steps)
-                    Log.e("ooo", "before save name: foodpic  ${foodPic.toString()}",)
-
-                    databaseReference?.child(getRandomString(5))?.setValue(user)
-                    // Create a new User object and save it to Firebase
-                    //  Log.e("ooo", "aftersavename:imguri ${imgURI.toString()}", )
-                    // Assuming you have a databaseReference properly initialized
-                    // Optionally, clear the EditText fields after saving data
-                    binding.imageView.setImageDrawable(null)
-                    binding.edFoodName.text.clear()
-                    binding.edMaterial.text.clear()
-                    binding.edMultiSteps.text.clear()
-                    Toast.makeText(this, "The Food Recipe has been saved", Toast.LENGTH_SHORT).show()
-
+                if(foodtype=="Select Food Type"){
+                    Toast.makeText(this, "Please Select Food Type", Toast.LENGTH_SHORT).show()
                 }else {
-                    Toast.makeText(this, "Please Upload image first", Toast.LENGTH_SHORT).show()
+                    if (intent != null) {
+                        Log.e("saving", "saveData: ${foodPic.toString()}",)
+                        val user = User(
+                            FoodName = foodName,
+                            Material = material,
+                            foodPic = foodPic,
+                            steps = steps,
+                            foodType = firebaseFoodType
+                        )
+                        Log.e("ooo", "before save name: foodpic  ${foodPic.toString()}",)
+
+                        databaseReference?.child(getRandomString(5))?.setValue(user)
+                        // Create a new User object and save it to Firebase
+                        //  Log.e("ooo", "aftersavename:imguri ${imgURI.toString()}", )
+                        // Assuming you have a databaseReference properly initialized
+                        // Optionally, clear the EditText fields after saving data
+                        binding.imageView.setImageDrawable(null)
+                        binding.edFoodName.text.clear()
+                        binding.edMaterial.text.clear()
+                        binding.edMultiSteps.text.clear()
+                        navigateBack()
+                        Toast.makeText(this, "The Food Recipe has been saved", Toast.LENGTH_SHORT)
+                            .show()
+
+                    } else {
+                        Toast.makeText(this, "Please Upload image first", Toast.LENGTH_SHORT).show()
+                    }
                 }
             }
 
@@ -199,7 +184,21 @@ class MainActivity : AppCompatActivity() {
 
     }
 
+    private fun SpinnerLoad(){
+        val options = arrayOf("Select Food Type", "Asian", "Western", "Korean", "Japanese")
+        spinnerFoodType.adapter = ArrayAdapter<String>(this, android.R.layout.simple_list_item_1,options)
+        spinnerFoodType.onItemSelectedListener = object : AdapterView.OnItemSelectedListener{
+            override fun onItemSelected(p0: AdapterView<*>?, view: View?, position: Int, id: Long) {
+                foodtype=options.get(position)
+               Log.e("000", "onItemSelected: ${foodtype}", )
+            }
 
+            override fun onNothingSelected(p0: AdapterView<*>?) {
+                foodtype="hi"
+            }
+
+        }
+    }
 
 
     fun getRandomString(length: Int): String {
@@ -210,32 +209,6 @@ class MainActivity : AppCompatActivity() {
     }
 
 
-    private fun getData(){
-        databaseReference?.addValueEventListener(object: ValueEventListener {
-            override fun onDataChange(snapshot: DataSnapshot) {
-               // Log.e("ooooo", "onDataChange: $snapshot ")
-                list.clear()
-                for (ds in snapshot.children){
-                    val id = ds.key
-                    val foodName = ds.child("foodName").value.toString()
-                    val material = ds.child("material").value.toString()
-                    val foodPic = ds.child("foodPic").value.toString()
-                    val steps = ds.child("steps").value.toString()
-
-
-                    val user= User(id = id, FoodName= foodName, Material= material, foodPic=foodPic, steps = steps)
-                    list.add(user)
-                }
-                Log.e("ooooo", "size${list.size} ")
-
-                adapter?.setItems(list)
-            }
-
-            override fun onCancelled(error: DatabaseError) {
-                Log.e("ooooo", "onCancelled: ${error.toException()}")
-            }
-        })
-    }
     private fun initUI() {
         btnSelectImage.setOnClickListener {
             Log.e("photo", "initUI: hihihiclicked",)
@@ -252,8 +225,9 @@ class MainActivity : AppCompatActivity() {
             val edfoodText = binding.edFoodName.text.toString()
             val edmaterial = binding.edMaterial.text.toString()
             val steps =binding.edMultiSteps.text.toString()
+            val firebaseFoodType = foodtype.toString()
             if (imgURI != null) {
-                FirebaseStorageManager().uploadImage(this, imgURI,edfoodText,edmaterial,steps, id)
+                FirebaseStorageManager().uploadImage(this, imgURI,edfoodText,edmaterial,steps, id, firebaseFoodType)
             } else {
                 Toast.makeText(this, "Please Select image first", Toast.LENGTH_SHORT).show()
             }
